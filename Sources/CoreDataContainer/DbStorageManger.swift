@@ -16,9 +16,13 @@ struct DbStorageManger {
             .create(create)
     }
 
-    func dbPath(name: String? = nil, create: Bool = true) throws -> URL {
+    func dbPath(
+        name: String? = nil,
+        subdirectory: String? = nil,
+        create: Bool = true
+    ) throws -> URL {
         let name = name ?? dbName
-        return try dbDirectory(name: name, create: true)
+        return try dbDirectory(name: subdirectory ?? name, create: true)
             .appendingPathComponent(name + ".sqlite")
     }
 

@@ -16,18 +16,26 @@ public protocol CoreDataContainer {
 extension NSPersistentContainer: CoreDataContainer {}
 
 public extension NSPersistentContainer {
-    convenience init(model: String, type: CoreDataType = .localDefault) throws {
+    convenience init(
+        model: String,
+        subdirectory: String? = nil,
+        type: CoreDataType = .localDefault,
+        printLocation: Bool = false
+    ) throws {
         self.init(name: model)
         switch type {
         case .inMemory:
             self.persistentStoreDescriptions.first?.url = URL.devNull
         case .local(let name):
-            let containerUrl = try DbStorageManger.shared.dbPath(name: name)
+            let containerUrl = try DbStorageManger.shared.dbPath(
+                name: name,
+                subdirectory: subdirectory
+            )
             let description = NSPersistentStoreDescription(url: containerUrl)
             persistentStoreDescriptions[0] = description
         }
-        if let location = persistentStoreDescriptions.first?.url {
-            print("Core data location: \(location.absoluteString)")
+        if let location = persistentStoreDescriptions.first?.url, printLocation {
+            self.printLocation(location)
         }
         viewContext.automaticallyMergesChangesFromParent = true
     }
@@ -42,5 +50,11 @@ public extension NSPersistentContainer {
                 }
             })
         }
+    }
+
+    private func printLocation(_ url: URL) {
+        #if DEBUG
+        print("Core data location: \(url.locationString)")
+        #endif
     }
 }
